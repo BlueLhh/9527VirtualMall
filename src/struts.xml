@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- package表示一个访问路径的集合 -->
+	<!-- name是package的包名，可以自定义，不与其他package重名即可 -->
+	<!-- namespace是本包的访问路径 -->
+	<!-- extends表示继承，一般继承struts-default， 表示在struts-default功能的基础上进行扩展 -->
+	<package name="default" namespace="/" extends="json-default">
+		<!-- 全局result，所有action共用 -->
+		<!-- <global-results>
+			后台的Action类的返回值为 error时就调用
+			<result name="error">/error.jsp</result>
+		</global-results> -->
+	
+		<!-- 配置拦截器 -->
+		<interceptors>
+			<interceptor name="mainProInterceptor" class="com.mao.vshop.web.interceptor.MainProInterceptor"></interceptor>
+			<interceptor name="listProInterceptor" class="com.mao.vshop.web.interceptor.ListProInterceptor"></interceptor>
+			<interceptor name="myOrderInterceptor" class="com.mao.vshop.web.interceptor.MyOrderInterceptor"></interceptor>
+			<interceptor name="shopProInterceptor" class="com.mao.vshop.web.interceptor.ShopProInterceptor"></interceptor>
+			<interceptor name="userInfoInterceptor" class="com.mao.vshop.web.interceptor.UserInfoInterceptor"></interceptor>
+			<interceptor name="mySellProInterceptor" class="com.mao.vshop.web.interceptor.MySellProInterceptor"></interceptor>
+		</interceptors>
+	
+		<action name="user_*" method="{1}" class="com.mao.vshop.web.action.UserAction">
+			<!-- 调用主页商品拦截器 -->
+			<interceptor-ref name="mainProInterceptor"></interceptor-ref>
+			<!-- 默认拦截器 -->
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<!-- 登录成功，跳转到主界面-->
+			<result name="login">/main.jsp</result>
+			<!-- 登录成功，跳转到购买页面-->
+			<result name="shop">/order.jsp</result>
+			<!-- 登录失败还是跳转到登录界面，同时提示用户名或密码错误 -->
+			<result name="error">/index.jsp</result>
+			<!-- 退出登录 -->
+			<result name="logout">/main.jsp</result>
+			<!-- 注册成功 -->
+			<result name="register">/reg-result.jsp</result>
+			<!-- 用户充值，先重定向到action通过拦截器刷新金额 -->
+			<result name="money" type="redirect">userinfo.action</result>
+		</action>	
+		
+		<!-- CommonAction类为商品，订单，用户共用的中转Action类 -->
+		<!-- 显示用户个人信息 -->
+		<action name="userinfo" class="com.mao.vshop.web.action.CommonAction">
+			<!-- 调用个人信息拦截器 -->
+			<interceptor-ref name="userInfoInterceptor"></interceptor-ref>
+			<!-- 默认拦截器 -->
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result name="success">/userinfo.jsp</result>
+		</action>		
+		
+		<!-- 显示商品列表界面的商品 -->
+		<action name="prolist" class="com.mao.vshop.web.action.CommonAction">
+			<!-- 搜索框的拦截器，筛选要显示的商品 -->
+			<interceptor-ref name="listProInterceptor"></interceptor-ref>
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result name="success">/list.jsp</result>
+		</action>
+		
+		<!-- 经过拦截器后，跳转到我购买的商品界面 -->
+		<action name="myorder" class="com.mao.vshop.web.action.CommonAction">
+			<interceptor-ref name="myOrderInterceptor"></interceptor-ref>
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result name="success">/myorder.jsp</result>
+		</action>
+		
+		<!-- 进入订单页面时的拦截器 -->
+		<action name="shop" class="com.mao.vshop.web.action.CommonAction">
+			<interceptor-ref name="shopProInterceptor"></interceptor-ref>
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result name="success">/order.jsp</result>
+		</action>
+		
+		<!-- 订单提交后，跳转到我购买的商品界面 -->
+		<action name="orderCommit" class="com.mao.vshop.web.action.OrderAction">
+			<!-- 提交订单后，利用type="redirect"重定向先跳转到myorder.action -->
+			<!-- 这样才会刷新我的订单 -->
+			<result name="success" type="redirect">myorder.action</result>
+		</action>
+		
+		<!-- 操作订单，撤销或者完成交易 -->
+		<action name="order_*" method="{1}" class="com.mao.vshop.web.action.OrderAction">
+			<result name="success" type="redirect">myorder.action</result>
+		</action>
+		
+		<!-- 根据订单状态显示商品 -->
+		<action name="status_*" method="{1}" class="com.mao.vshop.web.action.OrderStatusAction">
+			<result name="success">/myorder.jsp</result>
+		</action>
+		
+		<!-- 经过拦截器，跳转到我出售的商品界面 -->
+		<action name="mysell" class="com.mao.vshop.web.action.CommonAction">
+			<interceptor-ref name="mySellProInterceptor"></interceptor-ref>
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result name="success">/mysell.jsp</result>
+		</action>
+		
+		<!-- 商品出售 -->
+		<action name="proSell" class="com.mao.vshop.web.action.SellProAction">
+			<!-- 商品出售后先经过具有拦截器的action，然后在跳转我的出售的商品界面 -->
+			<result name="success" type="redirect">mysell.action</result>
+		</action>
+		
+		<!-- 操作商品的状态，取消上架 -->
+		<action name="prodown" method="down" class="com.mao.vshop.web.action.SellProAction">
+			<!-- 商品出售后先经过具有拦截器的action，然后在跳转到我的出售的商品界面 -->
+			<result name="success" type="redirect">mysell.action</result>
+		</action>
+		
+		<!-- 根据商品的状态显示商品 -->
+		<action name="mypro_*" method="{1}" class="com.mao.vshop.web.action.SellProStatusAction">
+			<result name="success">/mysell.jsp</result>
+		</action>
+		
+		<!-- 商品分类或者分页的Action -->
+		<action name="pro_*" method="{1}" class="com.mao.vshop.web.action.ProductAction">
+			<!-- 分类 -->
+			<result name="cate">/list.jsp</result>
+			<!-- 分页 -->
+			<result name="page">/list.jsp</result>
+		</action>
+		
+		<!-- 验证注册的用户名是否存在 -->
+		<action name="checkName" method="check" class="com.mao.vshop.web.action.CheckUserNameAction">
+			 <result name="ajax" type="json"></result>
+		</action>
+	</package>
+	<!-- 开启开发者模式 -->
+	<!-- 未开启时，修改xml配置文件，项目是不会自动重新部署的，而需要重启服务器 -->
+	<!-- 开启开发者模式后，每次请求都会重新加载配置文件，方便开发过程中测试 -->
+	<!-- 但会消耗更多的资源 -->
+	<!-- 建议在开发过程中开启，项目发布时关闭 -->
+	<constant name="struts.devMode" value="true"></constant>
+</struts>

@@ -1,0 +1,86 @@
+.userinfo {
+	width: 93.2%;
+	height: 190px;
+	background-color: #FFFCE9;
+	border: solid 1px #EEE685;
+	margin-top: -12px;
+	margin-left: -3px;
+}
+.userinfo img{
+	margin-top: 20px;
+	margin-left: 20px;
+}
+
+.userinfo .nameinfo{
+	margin-left:125px;
+	margin-top: -95px;
+	border-bottom: dashed 1px #EEE685;
+}
+
+.userinfo .levelinfo{
+	margin-left:125px;
+	margin-top: 20px;
+	border-bottom: dashed 1px #EEE685;
+}
+
+.userinfo .levelinfo img{
+	margin-top: -2px;
+	margin-left: -2px;
+}
+
+.userinfo .infoimg{
+	margin-left:125px;
+	margin-top: -10px;
+	border-bottom: dashed 1px #EEE685;
+}
+
+.userinfo .balance{
+	margin-left:125px;
+	margin-top: 10px;
+}
+
+.rlborder{
+	width:96%;
+	height:30px;
+	margin-left:19px;
+	border-left: solid 1px;
+	border-right: solid 1px;  
+}
+
+.dlist{
+	border-left: solid 1px;
+	border-right: solid 1px;  
+	margin-top: -28px;
+}
+
+
+.ostatus ul{
+	text-align:center;
+	width:96%;
+	height:249px;
+	margin-left:19px;
+	border-bottom: solid 1px; 
+	box-sizing: border-box;
+}
+
+.ostatus ul li{
+	width:120px;
+	text-align:center;
+	float: left;
+	background-color: #E8F2FF;
+	margin-right: 12px;
+	border: solid 1px;
+	border-bottom: solid 1px #ffffff;
+}
+.ostatus ul li:HOVER{
+	border-bottom: solid #fff; 
+}
+.ostatus ul li a{
+	text-decoration:none;
+}
+
+.ostatus ul li a:VISITED{
+	text-align:center;
+	text-decoration: none;
+}
+

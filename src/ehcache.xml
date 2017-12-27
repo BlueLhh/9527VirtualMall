@@ -1,0 +1,32 @@
+<ehcache>  
+	<!-- path设置在硬盘上的缓存路径 -->
+    <diskStore path="E:/Cache"/>  
+    <!-- defaultCache元素为默认缓存的数据过期策略 -->
+    <!-- maxElementsInMemory属性设置缓存对象的最大数目 -->
+    <!-- eternal属性指定是否永不过期，true为不过期，false为过期 -->
+    <!-- timeToldleSeconds属性设置对象处于空闲状态的最大秒数 -->
+    <!-- timeToLiveSeconds属性设置对象处于缓存状态的最大秒数 -->
+    <!-- overflowToDisk属性设置内存溢出时是否将溢出对象写入硬盘 -->
+    <defaultCache  
+        maxElementsInMemory="10000"  
+        eternal="false"  
+        timeToIdleSeconds="120"  
+        timeToLiveSeconds="120"  
+        overflowToDisk="true"  
+        />  
+    <!-- name="sampleCache1" 设置具体的命名缓存的数据过期策略 -->
+    <cache name="sampleCache1"  
+        maxElementsInMemory="10000"  
+        eternal="false"  
+        timeToIdleSeconds="300"  
+        timeToLiveSeconds="600"  
+        overflowToDisk="true"  
+        />  
+    <cache name="sampleCache2"  
+        maxElementsInMemory="1000"  
+        eternal="true"  
+        timeToIdleSeconds="0"  
+        timeToLiveSeconds="0"  
+        overflowToDisk="false"  
+        />  
+</ehcache>

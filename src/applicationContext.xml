@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx.xsd
+	http://www.springframework.org/schema/util 
+	http://www.springframework.org/schema/util/spring-util.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+	<!-- 开启以下属性，扫描包含注解的文件 -->
+	<context:component-scan base-package="com.mao.vshop" />
+	<!-- 引入jdbcinfo.properties配置文件 -->
+	<context:property-placeholder location="classpath:jdbcinfo.properties" />
+	<!-- 开启切面注解 -->
+	<aop:aspectj-autoproxy />
+	<!-- 给不适用spring的HibernateTemplate的Dao，添加spring的异常处理机制 -->
+	<bean
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+	<!-- c3p0连接池数据源，相当于jdbc的Connection -->
+	<bean name="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${driver}" />
+		<property name="jdbcUrl" value="${url}" />
+		<property name="user" value="${user}" />
+		<property name="password" value="${password}" />
+	</bean>
+
+	<!-- 配置Session工厂，相当于原来的hibernate.cfg.xml文件 -->
+	<bean name="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<!-- 注入数据源 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 注入使用注解实体类 -->
+		<property name="annotatedClasses">
+			<list>
+				<value>com.mao.vshop.model.pojo.TbUser</value>
+				<value>com.mao.vshop.model.pojo.TbProduct</value>
+				<value>com.mao.vshop.model.pojo.TbGameAccount</value>
+				<value>com.mao.vshop.model.pojo.TbOrder</value>
+				<value>com.mao.vshop.model.pojo.TbOrderItem</value>
+			</list>
+		</property>
+		<!-- 配置hibernate的基本属性 -->
+		<property name="hibernateProperties">
+			<props>
+				<!-- 配置数据库方言 -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- 格式化sql语句 -->
+				<prop key="hibernate.format_sql">true</prop>
+				<!-- 开启二级缓存 -->
+				<!-- <prop key="hibernate.cache.use_second_level_cache">true</prop> -->
+				<!-- 开启查询缓存 -->
+				<!-- <prop key="hibernate.cache.use_query_cache">true</prop> -->
+				<!-- 自动执行DDL语句 -->
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<!-- 这是spring对hibernate的session的一个扩展，在spring中继承hibernate4必须添加这个扩展 -->
+				<prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate4.SpringSessionContext
+				</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- 创建hibernate模板实例，当然也可以直接使用上面配置好的Session工厂来操作数据库 -->
+	<bean name="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<!-- 创建管理Hibernate的事务管理器 -->
+	<bean name="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<!-- 使用AOP实现事务管理 -->
+	<aop:config>
+		<!-- 定义切入点 -->
+		<aop:pointcut id="pointcutTx"
+			expression="execution(* com.mao.vshop.model.service.impl.*.*(..))" />
+		<!-- 配置事务通知器和切入点 -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="pointcutTx" />
+	</aop:config>
+
+	<!-- 定义一个事务通知器，使用事务管理器来管理 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="save*" isolation="DEFAULT" propagation="REQUIRED"
+				timeout="-1" />
+			<tx:method name="update" isolation="DEFAULT" propagation="REQUIRED"
+				timeout="-1" />
+			<tx:method name="delete" isolation="DEFAULT" propagation="REQUIRED"
+				timeout="-1" />
+			<tx:method name="*" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 基于注解的事务实现 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- 用于商品分类，分页查询的session -->
+	<bean id="session" class="org.hibernate.Session" factory-bean="hbUtils"
+		factory-method="getSession"></bean>
+</beans>
